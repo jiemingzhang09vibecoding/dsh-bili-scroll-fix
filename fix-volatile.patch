@@ -1,0 +1,14 @@
+--- a/index.js
++++ b/index.js
+@@ -163,7 +163,10 @@
+   const normalize = (src, base) => {
+     const out = { ...base }
+     for (const k of Object.keys(base)) {
+-      const v = src?.[k]
++      // ⭐ volatile 字段在 config 里是**引用对象**（{ get() }），不是标量 —— 不解引用就等于全被丢弃、
++      //    一律回落默认值 ⇒ 设置页里改的每个键都静默失效（pythonPath 永远 'python' 就是这条）。
++      let v = src?.[k]
++      if (v && typeof v === 'object' && typeof v.get === 'function') { try { v = v.get() } catch { /* 拿不到就当没设 */ } }
+       if (v === undefined || v === null) continue
+       if (Array.isArray(base[k])) { if (Array.isArray(v)) out[k] = v.filter((x) => typeof x === 'string') }
+       else if (typeof base[k] === 'number') { const n = Number(v); if (Number.isFinite(n)) out[k] = n }
