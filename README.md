@@ -97,7 +97,7 @@ ModuleNotFoundError: No module named 'bilibili_api'
 用宿主的 Electron 二进制（`ELECTRON_RUN_AS_NODE=1`）逐字复现 spawn：
 
 ```
-OUT prefix /Users/zhangjm/.dsh/bili-duty/.venv
+OUT prefix ~/.dsh/bili-duty/.venv
 launcher None
 bili ok
 exit 0
@@ -116,7 +116,7 @@ exit 0
 
 ```bash
 curl -X POST http://127.0.0.1:19387/api/bili-duty/config \
-  -d '{"pythonPath":"/Users/zhangjm/.dsh/bili-duty/.venv/bin/python"}'
+  -d '{"pythonPath":"~/.dsh/bili-duty/.venv/bin/python"}'
 ```
 
 返回 `host: {"ok": true, "ns": "bili-scroll"}`，`config.json` 和 `cordis.patch.yml` 都立即落盘正确值。
@@ -220,7 +220,7 @@ overlayMcp, workspace, reportLevel, replyToComments, replyPerRound
 ### 为什么 pythonPath 的后果最明显
 
 `pythonPath` 回落到 `'python'`，而 `PATH` 里第一个 `python` 是
-`/opt/miniconda3/envs/vibe-trading-ai/bin/python` —— 那里既没有 `bilibili_api` 也没有 `qrcode`。
+`/opt/miniconda3/envs/<env>/bin/python` —— 那里既没有 `bilibili_api` 也没有 `qrcode`。
 
 于是：
 
@@ -275,7 +275,7 @@ node -e "import('./index.js').then(m => console.log(m.name, m.inject))"
 
 ```js
 const raw = { perDay: 5, peakValley: true, autoComment: true,
-              pythonPath: '/Users/zhangjm/.dsh/bili-duty/.venv/bin/python', ... }
+              pythonPath: '~/.dsh/bili-duty/.venv/bin/python', ... }
 const fiberConfig = Config(raw)   // 宿主 apply(ctx, config) 拿到的就是这个形状
 
 normOld(fiberConfig, DEFAULTS).pythonPath   // 'python'      ❌
@@ -292,7 +292,7 @@ normFixed(fiberConfig, DEFAULTS).peakValley // true          ✅
 |---|---|
 | `GET /api/bili-duty/config` → `pythonPath` | ✅ venv 路径 |
 | `bili_search({keyword:'test', num:1})` | ✅ 返回 `BV1jx411w7FP` |
-| `bili_login_start` → `png` | ✅ `/Users/zhangjm/.dsh/bili-duty/qrcode_login.png` |
+| `bili_login_start` → `png` | ✅ `~/.dsh/bili-duty/qrcode_login.png` |
 | `POST /login/start` → `qr`（设置页 `<img src>` 用的） | ✅ 2150–2310 字节 base64 |
 | 二维码 PNG 实体 | ✅ 570×570，清晰可扫 |
 
@@ -381,7 +381,7 @@ const Config = z.object({
   peakValley: z.boolean().default(false).extra('volatile', true),
 })
 
-const VENV = '/Users/zhangjm/.dsh/bili-duty/.venv/bin/python'
+const VENV = '~/.dsh/bili-duty/.venv/bin/python'
 const fiberConfig = Config({ perDay: 7, pythonPath: VENV, keywords: ['b站'], peakValley: true })
 
 console.log('旧:', normOld(fiberConfig, DEFAULTS))
@@ -392,7 +392,7 @@ console.log('新:', normFixed(fiberConfig, DEFAULTS))
 
 ```
 旧: { perDay: 5, pythonPath: 'python', keywords: [], peakValley: false }
-新: { perDay: 7, pythonPath: '/Users/zhangjm/.dsh/bili-duty/.venv/bin/python',
+新: { perDay: 7, pythonPath: '~/.dsh/bili-duty/.venv/bin/python',
       keywords: [ 'b站' ], peakValley: true }
 ```
 

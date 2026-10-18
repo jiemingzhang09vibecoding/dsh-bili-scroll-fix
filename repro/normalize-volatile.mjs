@@ -50,7 +50,10 @@ const Config = z.object({
   peakValley: z.boolean().default(false).extra('volatile', true),
 })
 
-const VENV = process.env.VENV_PY || '/Users/zhangjm/.dsh/bili-duty/.venv/bin/python'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+
+const VENV = process.env.VENV_PY || join(homedir(), '.dsh/bili-duty/.venv/bin/python')
 
 // 宿主 apply(ctx, config) 拿到的就是这个形状
 const fiberConfig = Config({ perDay: 7, pythonPath: VENV, keywords: ['b站'], peakValley: true })
